@@ -4,13 +4,13 @@ import { createLogger } from './logger'
 import { ConfigurationManager } from './settings'
 import { isExtensionConfigUpdate } from './utils'
 
-export default function init({ typescript }: { typescript: typeof tsModule }) {
+export = function init({ typescript }: { typescript: typeof tsModule }) {
   const configurationManager = new ConfigurationManager()
+  let logger: ReturnType<typeof createLogger>
 
   return {
     create(info: tsModule.server.PluginCreateInfo): tsModule.LanguageService {
-      const logger = createLogger(info.project.projectService.logger)
-
+      logger = createLogger(info.project.projectService.logger)
       logger.log('info', 'Plugin create start')
 
       if (
@@ -20,7 +20,12 @@ export default function init({ typescript }: { typescript: typeof tsModule }) {
       }
 
       if (info.config.scriptPath) {
-        configurationManager.updateInstrumentationCallbackFromScriptPath(
+        logger.log(
+          'info',
+          `Updating configuration with script path ${info.config.scriptPath}`,
+        )
+
+        configurationManager.updateInstrumentationCallbacksFromScriptPath(
           info.config.scriptPath,
         )
       }
@@ -28,24 +33,34 @@ export default function init({ typescript }: { typescript: typeof tsModule }) {
       const handler: ProxyHandler<tsModule.LanguageService> = {
         get(target, propKey, receiver) {
           const original = Reflect.get(target, propKey, receiver)
+          const strPropKey = String(propKey)
 
-          if (propKey !== 'eventHandler') {
+          if (typeof original !== 'function') {
             return original
           }
 
-          return (event: tsModule.server.ProjectServiceEvent) => {
-            const userProvidedInstrumentationCallback =
-              configurationManager.get('userProvidedInstrumentationCallback')
+          logger.log('info', `Proxy get ${strPropKey}`)
 
-            if (userProvidedInstrumentationCallback) {
-              logger.log(
-                'info',
-                'Calling user provided instrumentation callback',
-              )
-              userProvidedInstrumentationCallback(event)
-            }
+          const userProvidedInstrumentationCallbacks = configurationManager.get(
+            'userProvidedInstrumentationCallbacks',
+          )
 
-            return original.apply(this, [event])
+          if (!(strPropKey in (userProvidedInstrumentationCallbacks ?? {}))) {
+            return original
+          }
+
+          logger.log('info', `Instrumenting ${strPropKey}`)
+
+          return (...args: any[]) => {
+            userProvidedInstrumentationCallbacks[strPropKey](
+              createLogger(
+                info.project.projectService.logger,
+                'User Provided Instrumentation Callback',
+              ),
+              ...args,
+            )
+
+            return original.apply(this, args)
           }
         },
       }
@@ -55,10 +70,15 @@ export default function init({ typescript }: { typescript: typeof tsModule }) {
       return new Proxy(info.languageService, handler)
     },
     onConfigurationChange(config: unknown) {
-      console.log('here?')
-
       if (isExtensionConfigUpdate(config)) {
-        configurationManager.updateInstrumentationCallbackFromScriptPath(
+        if (logger) {
+          logger.log(
+            'info',
+            `Updating configuration with script path ${config.scriptPath}`,
+          )
+        }
+
+        configurationManager.updateInstrumentationCallbacksFromScriptPath(
           config.scriptPath,
         )
       }

@@ -35,7 +35,7 @@ export class Extension {
           this.vscode.commands
             .executeCommand(
               '_typescript.configurePlugin',
-              'instrument-ts-server',
+              'plugin-instrument-ts-server',
               {
                 scriptPath,
               },

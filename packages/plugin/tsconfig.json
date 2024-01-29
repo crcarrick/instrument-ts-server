@@ -1,11 +1,13 @@
 {
   "compilerOptions": {
-    "module": "Node16",
-    "target": "ES2022",
+    "module": "commonjs",
+    "target": "es6",
     "outDir": "out",
-    "lib": ["ES2022"],
+    "lib": ["es6"],
     "sourceMap": true,
-    "rootDir": "src",
+    "baseUrl": "./src",
     "strict": true,
+    "esModuleInterop": true,
   },
+  "include": ["./src/**/*.ts"],
 }

@@ -1,32 +1,29 @@
-import tsModule from 'typescript/lib/tsserverlibrary'
+import type { Logger } from 'winston'
 
 export interface Configuration {
-  userProvidedInstrumentationCallback(
-    event: tsModule.server.ProjectServiceEvent,
-  ): void
+  userProvidedInstrumentationCallbacks: Record<
+    string,
+    (logger: Logger, ...args: any[]) => void
+  >
 }
 
 export class ConfigurationManager {
   private configuration: Configuration = {
-    userProvidedInstrumentationCallback() {},
+    userProvidedInstrumentationCallbacks: {},
   }
 
   public get<K extends keyof Configuration>(key: K): Configuration[K] {
     return this.configuration[key]
   }
 
-  public async updateInstrumentationCallbackFromScriptPath(scriptPath: string) {
-    const script = await import(scriptPath)
-
-    if (!script.instrument || typeof script.instrument !== 'function') {
-      throw new Error(
-        `The script at path ${scriptPath} does not export an instrument function.`,
-      )
-    }
+  public async updateInstrumentationCallbacksFromScriptPath(
+    scriptPath: string,
+  ) {
+    const script = require(scriptPath)
 
     this.configuration = {
       ...this.configuration,
-      userProvidedInstrumentationCallback: script.instrument,
+      userProvidedInstrumentationCallbacks: script,
     }
   }
 }

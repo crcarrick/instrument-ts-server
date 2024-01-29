@@ -6,14 +6,12 @@
     "name": "Chris Carrick",
     "email": "chris@crcarrick.dev"
   },
-  "categories": [
-    "Other"
-  ],
-  "main": "./out/index.js",
+  "main": "out/index.js",
   "scripts": {
-    "compile": "tsc -p ./",
+    "compile": "tsc",
     "lint": "eslint src --ext ts",
-    "watch": "tsc -watch -p ./"
+    "prepublish": "pnpm compile",
+    "watch": "tsc -watch"
   },
   "dependencies": {
     "triple-beam": "^1.4.1",
