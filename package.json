@@ -1,9 +1,70 @@
 {
-  "name": "instrument-ts-server-repo",
-  "version": "0.0.0",
-  "scripts": {},
-  "workspaces": [
-    "packages/extension",
-    "packages/plugin"
-  ]
+  "name": "instrument-ts-server",
+  "displayName": "instrument-ts-server",
+  "description": "",
+  "version": "0.0.1",
+  "author": {
+    "name": "Chris Carrick",
+    "email": "chris@crcarrick.dev"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "workspaceContains:**/*.ts{,x}"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "typescriptServerPlugins": [
+      {
+        "name": "instrument-ts-server",
+        "path": "../plugin/src/index.ts",
+        "enableForWorkspaceTypeScriptVersions": true
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Instrument TS Server",
+      "properties": {
+        "crcarrick.instrumentTsServer": {
+          "type": "object",
+          "description": "Instrument TS Server configuration",
+          "properties": {
+            "scriptPath": {
+              "type": "string",
+              "description": "An **absolute** path to the script that contains the functions to instrument the TS server"
+            }
+          }
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "pnpm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "pnpm run compile && pnpm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "vscode-test"
+  },
+  "dependencies": {
+    "triple-beam": "^1.4.1",
+    "typescript": "^5.3.3",
+    "winston": "^3.11.0",
+    "winston-transport": "^4.6.0"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.6",
+    "@types/node": "20.x",
+    "@types/triple-beam": "^1.3.5",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "@vscode/test-cli": "^0.0.4",
+    "@vscode/test-electron": "^2.3.8",
+    "eslint": "^8.56.0"
+  }
 }

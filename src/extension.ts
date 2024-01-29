@@ -1,3 +1,5 @@
+import fs from 'node:fs/promises'
+
 import * as vscode from 'vscode'
 import winston from 'winston'
 
@@ -5,13 +7,6 @@ import { createLogger } from './logger'
 
 export type LogLevel = 'info' | 'warn' | 'error' | 'debug'
 export type VSCode = typeof vscode
-
-interface ScriptHooks {
-  onStart(): void
-  onStop(): void
-}
-
-function noop() {}
 
 export class Extension {
   protected logger: winston.Logger
@@ -26,46 +21,47 @@ export class Extension {
     this.logger.log(level, message)
   }
 
-  async loadScriptHooks(): Promise<ScriptHooks> {
+  async loadScriptPath() {
     const scriptPath: string =
       this.vscode.workspace
         .getConfiguration('crcarrick.instrumentTsServer')
         .get('scriptPath') ?? ''
 
-    if (scriptPath) {
-      try {
-        const scriptHooks: ScriptHooks = await import(scriptPath)
-
-        return {
-          onStart: scriptHooks.onStart ?? noop,
-          onStop: scriptHooks.onStop ?? noop,
-        }
-      } catch (err) {
-        this.log(
-          `Failed to load script hooks from ${scriptPath}: ${err}`,
-          'error',
+    this.log(`Loaded script path: ${scriptPath}`)
+    if (await this.ensureScriptPath(scriptPath)) {
+      this.vscode.commands
+        .executeCommand('_typescript.configurePlugin', 'instrument-ts-server', {
+          scriptPath,
+        })
+        .then(
+          () => this.log('Script path passed to TS Server.'),
+          (reason) =>
+            this.log(
+              `Failed to pass script path to TS Server: ${reason}`,
+              'error',
+            ),
         )
-      }
+    }
+  }
+
+  protected async ensureScriptPath(scriptPath: string) {
+    try {
+      await fs.access(scriptPath)
+    } catch (error) {
+      this.log(`Cannot access script at path ${scriptPath}`, 'error')
+      return false
     }
 
-    return {
-      onStart() {},
-      onStop() {},
-    }
+    return true
   }
 }
 
 export async function activate(context: vscode.ExtensionContext) {
   const extension = new Extension(vscode)
-  const scriptHooks = await extension.loadScriptHooks()
-
-  vscode.commands.executeCommand(
-    '_typescript.configurePlugin',
-    'instrument-ts-server',
-    scriptHooks,
-  )
 
   extension.log('Instrumenting TS Server...')
+  await extension.loadScriptPath()
+  extension.log('Instrumented TS Server.')
 }
 
 export function deactivate(context: vscode.ExtensionContext) {
