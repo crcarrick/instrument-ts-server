@@ -4,11 +4,7 @@ import { createLogger } from './logger'
 import { ConfigurationManager } from './settings'
 import { isExtensionConfigUpdate } from './utils'
 
-interface InitParams {
-  typescript: typeof tsModule
-}
-
-export default function init({ typescript }: InitParams) {
+export default function init({ typescript }: { typescript: typeof tsModule }) {
   const configurationManager = new ConfigurationManager()
 
   return {
@@ -59,6 +55,8 @@ export default function init({ typescript }: InitParams) {
       return new Proxy(info.languageService, handler)
     },
     onConfigurationChange(config: unknown) {
+      console.log('here?')
+
       if (isExtensionConfigUpdate(config)) {
         configurationManager.updateInstrumentationCallbackFromScriptPath(
           config.scriptPath,

@@ -1,11 +1,11 @@
-import tsModule from 'typescript/lib/tsserverlibrary'
 import { MESSAGE } from 'triple-beam'
+import type { OutputChannel } from 'vscode'
 import winston from 'winston'
 import Transport, { type TransportStreamOptions } from 'winston-transport'
 
-export class TypescriptServerPluginTransport extends Transport {
+class VSCodeTransport extends Transport {
   constructor(
-    private logger: tsModule.server.Logger,
+    private outputChannel: OutputChannel,
     opts: TransportStreamOptions,
   ) {
     super(opts)
@@ -16,26 +16,21 @@ export class TypescriptServerPluginTransport extends Transport {
       this.emit('logged', info)
     })
 
-    this.logger.msg(info[MESSAGE])
+    this.outputChannel.appendLine(info[MESSAGE])
     callback()
   }
 }
 
-export function createLogger(logger: tsModule.server.Logger) {
+export function createLogger(outputChannel: OutputChannel) {
   return winston.createLogger({
     transports: [
-      new TypescriptServerPluginTransport(logger, {
+      new VSCodeTransport(outputChannel, {
         format: winston.format.combine(
           winston.format.timestamp({
             format: 'YYYY-MM-DD HH:mm:ss',
           }),
           winston.format.printf(
-            (info) =>
-              `${
-                info.timestamp
-              } [${info.level.toUpperCase()}] [Instrument TS Server] ${
-                info.message
-              }`,
+            (info) => `${info.timestamp} [${info.level}] ${info.message}`,
           ),
         ),
       }),
