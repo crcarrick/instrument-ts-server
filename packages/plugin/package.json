@@ -9,7 +9,7 @@
   "categories": [
     "Other"
   ],
-  "main": "./index.js",
+  "main": "./out/index.js",
   "scripts": {
     "compile": "tsc -p ./",
     "lint": "eslint src --ext ts",
