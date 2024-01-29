@@ -1,0 +1,11 @@
+{
+  "files.exclude": {
+    "packages/extension/out": false,
+    "packages/plugin/out": false
+  },
+  "search.exclude": {
+    "packages/extension/out": true,
+    "packages/plugin/out": true
+  },
+  "typescript.tsc.autoDetect": "off"
+}
