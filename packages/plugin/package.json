@@ -1,0 +1,15 @@
+{
+  "name": "plugin-instrument-ts-server",
+  "author": {
+    "name": "Chris Carrick",
+    "email": "chris@crcarrick.dev"
+  },
+  "version": "0.0.1",
+  "main": "./out",
+  "scripts": {
+    "compile": "tsc -p ./"
+  },
+  "dependencies": {
+    "typescript": "^4.4.3"
+  }
+}

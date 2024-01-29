@@ -1,0 +1,9 @@
+{
+  "name": "instrument-ts-server-repo",
+  "version": "0.0.0",
+  "scripts": {},
+  "workspaces": [
+    "packages/extension",
+    "packages/plugin"
+  ]
+}
