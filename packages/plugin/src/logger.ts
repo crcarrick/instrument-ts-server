@@ -23,7 +23,7 @@ export class TypescriptServerPluginTransport extends Transport {
 
 export function createLogger(
   logger: tsModule.server.Logger,
-  loggerName = 'Plugin Instrument TS Server',
+  loggerName = '[Plugin Instrument TS Server]',
 ) {
   return winston.createLogger({
     transports: [
@@ -34,7 +34,7 @@ export function createLogger(
           }),
           winston.format.printf(
             (info) =>
-              `${info.timestamp} [${info.level}] [${loggerName}] ${info.message}`,
+              `${info.timestamp} [${info.level}] ${loggerName} ${info.message}`,
           ),
         ),
       }),

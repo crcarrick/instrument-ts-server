@@ -39,8 +39,6 @@ export = function init({ typescript }: { typescript: typeof tsModule }) {
             return original
           }
 
-          logger.log('info', `Proxy get ${strPropKey}`)
-
           const userProvidedInstrumentationCallbacks = configurationManager.get(
             'userProvidedInstrumentationCallbacks',
           )
@@ -55,7 +53,7 @@ export = function init({ typescript }: { typescript: typeof tsModule }) {
             userProvidedInstrumentationCallbacks[strPropKey](
               createLogger(
                 info.project.projectService.logger,
-                'User Provided Instrumentation Callback',
+                `[Plugin Instrument TS Server] [${strPropKey}]`,
               ),
               ...args,
             )
