@@ -16,7 +16,7 @@ export class TypescriptServerPluginTransport extends Transport {
       this.emit('logged', info)
     })
 
-    this.logger.msg(info[MESSAGE])
+    this.logger.msg(info[MESSAGE], tsModule.server.Msg.Perf)
     callback()
   }
 }
@@ -28,14 +28,8 @@ export function createLogger(
   return winston.createLogger({
     transports: [
       new TypescriptServerPluginTransport(logger, {
-        format: winston.format.combine(
-          winston.format.timestamp({
-            format: 'YYYY-MM-DD HH:mm:ss',
-          }),
-          winston.format.printf(
-            (info) =>
-              `${info.timestamp} [${info.level}] ${loggerName} ${info.message}`,
-          ),
+        format: winston.format.printf(
+          (info) => `[${info.level}] ${loggerName} ${info.message}`,
         ),
       }),
     ],

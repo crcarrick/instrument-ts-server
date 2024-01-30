@@ -1,9 +1,5 @@
-export interface ExtensionConfigUpdate {
+export function isExtensionConfigUpdate(config: unknown): config is {
   scriptPath: string
-}
-
-export function isExtensionConfigUpdate(
-  config: unknown,
-): config is ExtensionConfigUpdate {
+} {
   return typeof config === 'object' && config !== null && 'scriptPath' in config
 }

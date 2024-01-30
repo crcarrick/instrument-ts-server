@@ -1,29 +1,27 @@
 import type { Logger } from 'winston'
 
 export interface Configuration {
-  userProvidedInstrumentationCallbacks: Record<
+  userProvidedCallbacks: Record<
     string,
-    (logger: Logger, ...args: any[]) => void
+    <T extends any[]>(
+      logger: Logger,
+      ...args: T
+    ) => ((result: any) => void) | void
   >
 }
 
 export class ConfigurationManager {
   private configuration: Configuration = {
-    userProvidedInstrumentationCallbacks: {},
+    userProvidedCallbacks: {},
   }
 
   public get<K extends keyof Configuration>(key: K): Configuration[K] {
     return this.configuration[key]
   }
 
-  public async updateInstrumentationCallbacksFromScriptPath(
-    scriptPath: string,
-  ) {
+  public async updateCallbacksFromScriptPath(scriptPath: string) {
     const script = require(scriptPath)
 
-    this.configuration = {
-      ...this.configuration,
-      userProvidedInstrumentationCallbacks: script,
-    }
+    this.configuration.userProvidedCallbacks = script
   }
 }
